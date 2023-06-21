@@ -1,0 +1,156 @@
+﻿<style>
+    .Scroll-panel {
+        height: 300px;
+        overflow-y: scroll;
+        width: 100%;
+    }
+
+    .wellmargin {
+        margin-bottom: 10px;
+        border-bottom: none;
+    }
+</style>
+
+<ul class="breadcrumb">
+    <li>
+        <i class="icon-home"></i>
+        <a href="/Home/Index">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li><a href="#">Charts</a></li>
+</ul>
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="height: 50px;padding:10px">
+                <h4 class="panel-title pull-left" style="padding-top: 7.5px;">Survey Charts</h4>
+            </div>
+
+            <div class="panel-body">
+                <div class="panel-group">
+                    <div class="panel panel-success">
+                        <div class="panel-heading" style="height: 75px;padding:10px">
+                            @Html.Label("Survey", htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.DropDownList("SurveyBag", null, htmlAttributes: new { @class = "form-control input-sm", @id = "SurveyId" })
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group row">
+
+                                @Html.Label("DateStart", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-2">
+                                    @Html.Editor("DateStart", new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateStart", @readonly = "readonly", } })
+                                </div>
+                                @Html.Label("DateEnd", htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-2">
+                                    @Html.Editor("DateEnd", new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateEnd", @readonly = "readonly" } })
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container" id="ChartId">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+
+        $(document).ready(function () {
+
+            $(".nav li").removeClass("active");//this will remove the active class from
+            //previously active menu item
+            $('#navResult').addClass('active');
+
+            LoadSurveyResult();
+
+        });
+
+        $(function () {
+            $("#SurveyId").change(function () {
+                LoadSurveyResult();
+            });
+        });
+
+        function LoadSurveyResult() {
+
+            var SurveyId = $('option:selected', $("#SurveyId")).val();
+            if (SurveyId == 0)
+                return true;
+
+            EmailTemplateData = null;
+
+            $.ajax({
+                url: "/Result/GetChartData",
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                data: '{ SurveyId: ' + $('#SurveyId').val() + ' }',
+                dataType: "json",
+                success: function (result) {
+
+                    PopulateChartData(result);
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Error getting CustomerSurveyMap!');
+                }
+            });
+
+        }
+
+        function PopulateChartData(ChartData) {
+
+            $('.AnsRow').empty();
+
+            $('#DateStart').val(ChartData.DateStart);
+            $('#DateEnd').val(ChartData.DateEnd);
+
+            $.each(ChartData.ResultSQs, function (index, item) {
+                if (item.SurveyType == 1) {
+
+                    var Maindiv = $('<div class="AnsRow"> <div class="panel panel-default">' +
+                    '<div class="panel-heading" style="height: 50px;padding:10px">' +
+                    '<label class ="control-label col-md-4">' + item.Surveyquestion + '</label>'
+                   + '</div> <div class="panel-body"><div class="form-group row col-md-4 col-sm-4 col-xs-4">'
+                    + '<canvas id="canvas' + index + '" height="20" width="30"></canvas> </div> </div> </div></div>');
+
+                    $('#ChartId').append(Maindiv);
+
+                    var ctx = $('#canvas' + index).get(0).getContext("2d");
+                    var myBarChart = new Chart(ctx).Bar(item.ChartData, { responsive: true });
+                }
+                else if (item.SurveyType == 2) {
+                    var MaindivStr = '<div class="AnsRow"> <div class="panel panel-default">' +
+                   '<div class="panel-heading" style="height: 50px;padding:10px">' +
+                   '<label class ="control-label col-md-4">' + item.Surveyquestion + '</label>'
+                  + '</div> <div class="panel-body  Scroll-panel">';
+
+                    $.each(item.SurveyNote, function (indexNote, itemNote) {
+
+                        MaindivStr += '<div class="well wellmargin well-sm">';
+                        MaindivStr += '<Strong>' + itemNote.CustomerName + '</Strong>: ' + itemNote.CustomerNote + '</div>';
+                    });
+
+                    MaindivStr += '</div></div></div>';
+
+                    var Maindiv = $(MaindivStr);
+                    $('#ChartId').append(Maindiv);
+                }
+
+            });
+
+        }
+
+    </script>
+}

@@ -1,0 +1,79 @@
+﻿@model MtsSurvey.Models.UserVM
+
+@{
+    Layout = "~/Views/Shared/_LayoutSurveyPage.cshtml"; 
+}
+
+<div class="container">
+    <br />
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    @Html.DisplayFor(m => m.SurveyCaption)
+                </h4>
+            </div>
+            <div class="panel-body">
+                <div class="panel-group">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+
+                        @Html.HiddenFor(m => m.UserID)
+                        @*<p>
+                                Dear
+                                @Html.DisplayFor(m => m.Name)
+                            </p>*@
+                        @Html.HiddenFor(m => m.SurveyID)
+                        for (int i = 0; i < Model.NavQuestions.Count; i++)
+                        {
+                            <div class="panel panel-success">
+                                <div class="panel-heading">
+                                    @Html.HiddenFor(m => m.NavQuestions[i].ID)
+                                    @Html.Label((i + 1).ToString())
+                                    @Html.DisplayFor(m => m.NavQuestions[i].Text)
+                                </div>
+                                <div class="panel-body">
+                                    @if (Model.NavQuestions[i].QuestionType == 1)
+                                    {
+                                        foreach (var answer in Model.NavQuestions[i].NavPossibleAnswers)
+                                        {
+                                            <div class="radio">
+
+                                                @* @Html.RadioButtonFor(m => m.NavQuestions[i].SelectedAnswer, answer.ID, new { id = answer.ID, @type="radio" })*@
+                                                <label> @Html.RadioButtonFor(m => m.NavQuestions[i].SelectedAnswer, answer.ID, new { id = answer.ID, @type = "radio" }) @answer.Text</label>
+                                            </div>
+                                        }
+                                        @Html.ValidationMessageFor(m => m.NavQuestions[i].SelectedAnswer)
+                                    }
+                                    else if (Model.NavQuestions[i].QuestionType == 2)
+                                    {
+                                        <div>
+                                            @Html.TextAreaFor(m => m.NavQuestions[i].SurveyReply, new { @class = "form-control", @rows = 3 })
+                                        </div>
+
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <br />
+                        <input type="submit" value="Finish" class="btn btn-success" />
+
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $(document).ready(function () {
+
+        });
+    </script>
+}

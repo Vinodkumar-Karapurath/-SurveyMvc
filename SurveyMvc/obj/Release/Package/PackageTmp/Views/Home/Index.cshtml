@@ -1,0 +1,88 @@
+﻿
+<div id="content" class="span10">
+    <ul class="breadcrumb">
+        <li>
+            <i class="icon-home"></i>
+            <a href="#">Dashboard</a>
+            <i class="icon-angle-right"></i>
+        </li>
+    </ul>
+</div>
+
+<div class="container">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="col-md-10 col-sm-12 col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Active Survey Status
+                </div>
+                <div class="panel-body">
+                    <div class="container" id="graphPanel">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    @section Scripts {
+
+        <script>
+            // Global variable for table data
+
+            $(document).ready(function () {
+                $(".nav li").removeClass("active");//this will remove the active class from
+                //previously active menu item
+                $('#navHome').addClass('active');
+
+                LoadDrawData();
+                setInterval(function () { LoadDrawData(); }, 30000);
+            });
+
+            function LoadDrawData() {
+
+                $.ajax({
+                    url: "/Home/GeSurveySummary",
+                    contentType: "application/json; charset=utf-8",
+                    type: "POST",
+                    data: null,
+                    dataType: "json",
+                    success: function (result) {
+
+                        DrawGraph(result);
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Error getting CustomerSurveyMap!');
+                    }
+                });
+            }
+
+            function DrawGraph(ChartData) {
+                $('.ChartRow').remove();
+
+
+                $.each(ChartData, function (index, item) {
+                    var Maindiv = $('<div class="ChartRow"></div>');
+
+                    var CaptionP = $('<p></p>');
+                    CaptionP.append(item.SurveyCaption + ' ' + item.countFinished + '/' + (item.countFinished + item.countRemains) + ' Done');
+
+                    var iPer = parseInt((item.countFinished / (item.countFinished + item.countRemains)) * 100);
+
+                    var progressdiv = $('<div class="progress"> </div>');
+
+                    var Graphdiv = $('<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:' + iPer + '%">' + iPer + '% Complete</div>');
+                    progressdiv.append(Graphdiv);
+
+                    Maindiv.append(CaptionP).append(progressdiv);
+
+
+
+                    $('#graphPanel').append(Maindiv);
+
+                });
+
+            }
+        </script>
+    }

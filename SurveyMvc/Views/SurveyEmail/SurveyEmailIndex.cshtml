@@ -1,0 +1,254 @@
+﻿@model MtsSurvey.Models.EmailTemplate
+
+<style>
+    .Chkcontainer {
+        border: 1px solid #ccc;
+        width: 100%;
+        height: 100px;
+        padding-left: 1.7em;
+        resize: both;
+        overflow: auto;
+    }
+</style>
+<ul class="breadcrumb">
+    <li>
+        <i class="icon-home"></i>
+        <a href="/Home/Index">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li><a href="#">Emails</a></li>
+</ul>
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="height: 50px;padding:10px">
+                <h4 class="panel-title pull-left" style="padding-top: 7.5px;">Send Emails</h4>
+            </div>
+            <div class="panel-body">
+
+                @using (Ajax.BeginForm("SendEmail", "SurveyEmail", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmID" }))
+                {
+                    <div class="modal-body">
+
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div class="form-group row">
+                            @Html.Label("Survey", htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.DropDownList("SurveyBag", null, htmlAttributes: new { @class = "form-control input-sm", @id = "SurveyId" })
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.DateStart, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.DateStart, new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateStart", @readonly = "readonly", } })
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.DateEnd, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.DateEnd, new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateEnd", @readonly = "readonly" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.EmailMsg, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.TextAreaFor(model => model.EmailMsg, htmlAttributes: new { @class = "form-control  input-sm" })
+                                @Html.ValidationMessageFor(model => model.EmailMsg, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            @Html.Label("Company", htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.DropDownList("CompanyBag", null, htmlAttributes: new { @class = "form-control input-sm", @id = "CompanyBagId" })
+                            </div>
+                        </div>
+
+
+                        <div class="form-group row">
+                            @Html.Label("Customer List", htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-5">
+                                <div class="Chkcontainer checkbox" id="ChkOne">
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-4">
+                            </div>
+                            <div class="col-md-5">
+                                <div class="checkbox input-sm">
+                                    <label><input type="checkbox" id="chkAll" value="">Select All</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Send Email</button>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        //For Add And update object of SurveyMaster
+        var EmailTemplateData = null;
+
+        $(document).ready(function () {
+
+            $(".nav li").removeClass("active");//this will remove the active class from
+            //previously active menu item
+            $('#navSurveyEmail').addClass('active');
+
+            LoadCustSurveyMap();
+        });
+
+        function FilterSelectedID(arrData) {
+            return (arrData.UserUpdateChk == true);
+        }
+
+        $('#frmID').submit(function () {
+            if ($(this).valid()) {
+
+                var NewSurvey = new Object();
+                NewSurvey.SurveyId = $('option:selected', $("#SurveyId")).val();
+                NewSurvey.EmailMsg = $("#EmailMsg").val();
+                NewSurvey.EmailSurveyCustomerMapModels = EmailTemplateData.EmailSurveyCustomerMapModels.filter(FilterSelectedID);
+
+                $('html, body').css("cursor", "wait");
+                $.ajax({
+                    url: this.action,
+                    contentType: "application/json; charset=utf-8",
+                    type: this.method,
+                    data: "{'EmailTemplateObj':" + JSON.stringify(NewSurvey) + "}",
+                    dataType: "json",
+                    success: function (result) {
+                        alert("Email sent to selected customers!");
+                        $('html, body').css("cursor", "auto");
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Error getting Email sending!');
+                        $('html, body').css("cursor", "auto");
+                    }
+                });
+            }
+            return false;
+        });
+
+        $(function () {
+            $("#SurveyId").change(function () {
+                LoadCustSurveyMap();
+            });
+        });
+
+        function LoadCustSurveyMap() {
+
+            var SurveyId = $('option:selected', $("#SurveyId")).val();
+            if (SurveyId == 0)
+                return true;
+
+            EmailTemplateData = null;
+            $('html, body').css("cursor", "wait");
+            $.ajax({
+                url: "/SurveyEmail/GetCustomerSurveyMap",
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                data: '{ SurveyId: ' + $('#SurveyId').val() + ' }',
+                dataType: "json",
+                success: function (result) {
+
+                    $('#chkAll').prop('checked', false);
+                    EmailTemplateData = result;
+                    $('#DateStart').val(EmailTemplateData.DateStart);
+                    $('#DateEnd').val(EmailTemplateData.DateEnd);
+                    PopulateCustSurveyMap();
+                    $('html, body').css("cursor", "auto");
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Error getting CustomerSurveyMap!');
+                    $('html, body').css("cursor", "auto");
+                }
+            });
+
+        }
+
+        $(document).on('change', '#chkAll', function () {
+
+            var chkres = $(this).is(':checked');
+
+            $(EmailTemplateData.EmailSurveyCustomerMapModels).each(function (i, val) {
+
+                EmailTemplateData.EmailSurveyCustomerMapModels[i].UserUpdateChk = chkres;
+
+            });
+
+            PopulateCustSurveyMap();
+        });
+
+        $(document).on('change', '#chkcls', function () {
+
+            var chkval = $(this).next('.Incls').val();
+            var chkres = $(this).is(':checked');
+
+            $(EmailTemplateData.EmailSurveyCustomerMapModels).each(function (i, val) {
+
+                if (this.CustomerId == chkval) {
+                    EmailTemplateData.EmailSurveyCustomerMapModels[i].UserUpdateChk = chkres;
+
+                }
+
+            });
+        });
+
+        function checkCompanyId(arrData) {
+            var CompanyId = $('option:selected', $("#CompanyBagId")).val();
+            if (CompanyId == 0)
+                return true;
+            else
+                return arrData.CompanyId == CompanyId;
+        }
+
+        $(function () {
+            $("#CompanyBagId").change(function () {
+                PopulateCustSurveyMap();
+            });
+        });
+
+        function PopulateCustSurveyMap() {
+
+            $('.AnsRow').remove();
+
+            arrData = EmailTemplateData.EmailSurveyCustomerMapModels.filter(checkCompanyId);
+
+            $.each(arrData, function (index, item) {
+                var Maindiv = $('<div class="AnsRow"></div>');
+                var Lbl = $('<label></label>');
+                var InputChk = $('<input type="checkbox" id="chkcls"/>');
+                $(InputChk).prop('checked', item.UserUpdateChk);
+
+                var InputAnsSeq = $('<input type="hidden" class="Incls" name = CustomerId value = "' + item.CustomerId + '"/>');
+
+                Lbl.append(InputChk).append(InputAnsSeq).append(item.CustomerName);
+                Maindiv.append(Lbl).append('<br/>');
+
+                $('#ChkOne').append(Maindiv);
+
+            });
+        }
+
+    </script>
+}

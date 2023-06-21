@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="IIS Web Application Name" description="" value="738c9190-0ee0-4-231-b9ee" tags="IisApp">
+    <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\Users\\Administrator\\documents\\visual\ studio\ 2013\\Projects\\SurveyMvc\\SurveyMvc\\obj\\Release\\Package\\PackageTmp$" />
+    <parameterEntry kind="ProviderPath" scope="setAcl" match="^C:\\Users\\Administrator\\documents\\visual\ studio\ 2013\\Projects\\SurveyMvc\\SurveyMvc\\obj\\Release\\Package\\PackageTmp$" />
+  </parameter>
+  <parameter name="SurveyDb-Web.config Connection String" description="" value="Data Source=VINODLAPTOP;Initial Catalog=SurveyMvc;Integrated Security=True;MultipleActiveResultSets=True" tags="">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Administrator\\documents\\visual\ studio\ 2013\\Projects\\SurveyMvc\\SurveyMvc\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='SurveyDb']/@connectionString" />
+  </parameter>
+</parameters>

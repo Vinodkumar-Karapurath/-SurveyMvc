@@ -1,0 +1,651 @@
+﻿@model MtsSurvey.Models.SurveyTemplate
+
+
+<style>
+    .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        background-color: #b3cbdc;
+    }
+
+    .Chkcontainer {
+        border: 1px solid #ccc;
+        width: 100%;
+        height: 100px;
+        padding-left: 1.7em;
+        resize: both;
+        overflow: auto;
+    }
+</style>
+<ul class="breadcrumb">
+    <li>
+        <i class="icon-home"></i>
+        <a href="/Home/Index">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li><a href="#">Survey Master</a></li>
+</ul>
+
+<br />
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="height: 50px;padding:10px">
+                <h4 class="panel-title pull-left" style="padding-top: 7.5px;">Survey Master</h4>
+
+                <div class="btn-group pull-right">
+                    <a href="#" class="btn btn-default  btn-sm">
+                        <span class="glyphicon glyphicon-plus-sign" id="myAddBtn">Add</span>
+                    </a>
+                    <a href="#" class="btn btn-default  btn-sm" id="myDelBtn">
+                        <span class="glyphicon  glyphicon-pencil">Edit</span>
+                    </a>
+                </div>
+
+            </div>
+            <div class="panel-body">
+                @using (Html.BeginForm())
+                {
+                    <div class="table-responsive">
+                        <table id="tblSurvey" class="table table-striped table-bordered table-hover table-condensed">
+                            <tr class="success">
+                                <th><a id="lnkSurveyID" href="#">SurveyID</a></th>
+                                <th><a id="lnkSurveyName" href="#">Survey Name</a></th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                            </tr>
+                        </table>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Customer -->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add Survey</h4>
+            </div>
+            @using (Ajax.BeginForm("AddSurvey", "SurveyMaster", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveyCaption, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.SurveyCaption, new { htmlAttributes = new { @class = "form-control input-sm" } })
+                            @Html.ValidationMessageFor(model => model.SurveyCaption, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.DateStart, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.DateStartForDisplay, new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateStart", @readonly = "readonly", } })
+                            @Html.ValidationMessageFor(model => model.DateStart, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.DateEnd, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.DateEndForDisplay, new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateEnd", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.DateEnd, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.Label("Company", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.DropDownList("CompanyBag", null, htmlAttributes: new { @class = "form-control input-sm", @id = "CompanyBagId" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.Label("Customer List", htmlAttributes: new { @class = "control-label col-md-6" })
+
+                        <div class="col-md-6">
+                            <div class="Chkcontainer checkbox" id="ChkOne">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit/Delete comapny -->
+<div id="myDelModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit/Delete Survey</h4>
+            </div>
+            @using (Ajax.BeginForm(null, "SurveyMaster", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmEdtID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveyId, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.SurveyId, new { htmlAttributes = new { @class = "form-control input-sm", @readonly = "readonly", @id = "SurveyId1" } })
+                            @Html.ValidationMessageFor(model => model.SurveyId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveyCaption, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.SurveyCaption, new { htmlAttributes = new { @class = "form-control input-sm", @id = "SurveyCaption1" } })
+                            @Html.ValidationMessageFor(model => model.SurveyCaption, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.DateStart, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.DateStartForDisplay, new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateStart1", @readonly = "readonly", } })
+                            @Html.ValidationMessageFor(model => model.DateStart, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.DateEnd, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.DateEndForDisplay, new { htmlAttributes = new { @class = "form-control input-sm", @id = "DateEnd1", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.DateEnd, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.Label("Company", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.DropDownList("CompanyBag", null, htmlAttributes: new { @class = "form-control input-sm", @id = "CompanyBagId1" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.Label("Customer List", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            <div class="Chkcontainer checkbox" id="ChkTwo">
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="btnUpdate" type="button" class="btn btn-default">Update</button>
+                    <button id="btnDel" type="button" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        // Global variable for table data
+        var tableData = null;
+        var pNumKeep = 1;
+
+        //For Add And update object of SurveyMaster
+        var SurveyTemplateData = null;
+
+        //edit delete js
+        function validator() {
+            return $('#frmEdtID').valid();
+
+        }
+
+        $('.modal-dialog').draggable({
+            handle: ".modal-header"
+        });
+
+
+        $('#btnUpdate').click(function () {
+
+            if (validator()) {
+
+                var NewSurvey = new Object();
+                NewSurvey.SurveyId = $("#SurveyId1").val();
+                NewSurvey.SurveyCaption = $("#SurveyCaption1").val();
+                NewSurvey.DateStart = $("#DateStart1").val();
+                NewSurvey.DateEnd = $("#DateEnd1").val();
+                NewSurvey.SurveyCustomerTemplateModels = SurveyTemplateData.SurveyCustomerTemplateModels.filter(FilterSelectedID);
+
+                $.ajax({
+                    url: '@Url.Action("UpdatedSurvey")',
+                    contentType: "application/json; charset=utf-8",
+                    type: "POST",
+                    data: "{'SurveyTemplateObj':" + JSON.stringify(NewSurvey) + "}",
+                    dataType: "json",
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (this.SurveyId == result.SurveyId) {
+                                tableData.splice(i, 1, result);
+                            }
+
+                        });
+                        $('#SurveyId1').val("");
+                        $('#SurveyCaption1').val("");
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+        $('#btnDel').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("DeleteSurvey")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (val.SurveyId == result.SurveyId) {
+                                tableData.splice(i, 1);
+                            }
+
+                        });
+                        $('#SurveyId1').val("");
+                        $('#SurveyCaption1').val("");
+
+                        // Show pager row if there is more than one page
+                        var pages = Math.floor(tableData.length / 10);
+                        if (pages < tableData.length / 10) {
+                            pages += 1;
+                        }
+                        if (pages < pNumKeep) pNumKeep = pNumKeep - 1;
+
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+
+        $('#tblSurvey').on('click', 'tr', function (e) {
+            e.preventDefault();
+
+            if ($(this).children('td:nth-child(1)').html() > 0) {
+
+                if ($(this).hasClass('danger')) {
+                    $(this).removeClass('danger');
+                } else {
+                    $(this).addClass('danger').siblings().removeClass('danger');
+                }
+
+                $('#SurveyId1').val($(this).children('td:nth-child(1)').html());
+
+            }
+        });
+
+        function FilterSelectedID(arrData) {
+            return (arrData.UserUpdateChk == true || arrData.DbValueChk == true);
+        }
+
+        $('#frmID').submit(function () {
+            if ($(this).valid()) {
+
+                var NewSurvey = new Object();
+                NewSurvey.SurveyCaption = $("#SurveyCaption").val();
+                NewSurvey.DateStart = $("#DateStart").val();
+                NewSurvey.DateEnd = $("#DateEnd").val();
+                NewSurvey.SurveyCustomerTemplateModels = SurveyTemplateData.SurveyCustomerTemplateModels.filter(FilterSelectedID);
+
+                $.ajax({
+                    url: this.action,
+                    contentType: "application/json; charset=utf-8",
+                    type: this.method,
+                    data: "{'SurveyTemplateObj':" + JSON.stringify(NewSurvey) + "}",
+                    dataType: "json",
+                    success: function (result) {
+
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                        });
+                        $('#SurveyCaption').val("");
+                        tableData = tableData.concat(result);
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert(result.Message);
+                    }
+                });
+            }
+            return false;
+        });
+
+        $(document).ready(function () {
+
+            $(".nav li").removeClass("active");//this will remove the active class from
+            //previously active menu item
+            $('#navSurveyMaster').addClass('active');
+
+
+            $('#DateStart').datepicker({ dateFormat: "dd/mm/yy" });
+            $('#DateEnd').datepicker({ dateFormat: "dd/mm/yy" });
+
+            $('#DateStart1').datepicker({ dateFormat: "dd/mm/yy" });
+            $('#DateEnd1').datepicker({ dateFormat: "dd/mm/yy" });
+
+            $.ajaxSetup({
+                cache: false
+            });
+
+            //console.log("window ready");
+            // Populate categories when the page is loaded.
+            $.getJSON('/SurveyMaster/GetAllSurvey', function (data) {
+                // Populate table from Json data returned from server.
+                PopulateTable(data, 1);
+                pNumKeep = 1;
+                tableData = data.slice(0);
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                // Ajax fail callback function.
+                alert('Error getting Survey!');
+            });
+
+            // Link ActivityId ID click event handler
+            $('#lnkCompanyID').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.SurveyId <= b.SurveyId ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // Link date Name click event handler
+            $('#lnkSurveyID').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.CompanyName <= b.CompanyName ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // row full selection
+            $('#tblProducts tr').click(function () {
+                var href = $(this).find("a").attr("href");
+                if (href) {
+                    window.location = href;
+                }
+            });
+
+            //Add new Model display
+
+            $("#myAddBtn").click(function () {
+                SurveyTemplateData = null;
+
+                $.ajax({
+                    url: "/SurveyMaster/GetAllCustomerSurveyMap",
+                    contentType: "application/json; charset=utf-8",
+                    type: "POST",
+                    data: "{ SurveyId: 0 }",
+                    dataType: "json",
+                    success: function (result) {
+                        SurveyTemplateData = result;
+                        PopulateCustSurveyMap();
+                        $("#myModal").modal('show');
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Error getting SurveyAnswer!');
+                    }
+                });
+            });
+
+            //Edit new Model display
+
+            $("#myDelBtn").click(function () {
+
+                SurveyTemplateData = null;
+                if ($('#SurveyId1').val() == 0) {
+                    alert('Pls select a survey!');
+                    return;
+                }
+                $.ajax({
+                    url: "/SurveyMaster/GetAllCustomerSurveyMap",
+                    contentType: "application/json; charset=utf-8",
+                    type: "POST",
+                    data: '{ SurveyId: ' + $('#SurveyId1').val() + ' }',
+                    dataType: "json",
+                    success: function (result) {
+                        SurveyTemplateData = result;
+                        $('#SurveyCaption1').val(SurveyTemplateData.SurveyCaption);
+                        var date = new Date(parseInt(SurveyTemplateData.DateStart.substr(6)));
+                        var dat = date.getDate() +
+                       "/" +
+                       (date.getMonth() +
+                         1)
+                        + "/" +
+                        date.getFullYear();
+                        $('#DateStart1').val(dat);
+                        var dateend = new Date(parseInt(SurveyTemplateData.DateEnd.substr(6)));
+                        dat = dateend.getDate() +
+                       "/" +
+                       (dateend.getMonth() +
+                         1)
+                        + "/" +
+                        dateend.getFullYear();
+                        $('#DateEnd1').val(dat);
+                        PopulateCustSurveyMapEdt();
+                        $("#myDelModal").modal('show');
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Error getting SurveyAnswer!');
+                    }
+                });
+
+            });
+
+        });
+
+        $(document).on('change', '#chkcls', function () {
+
+            var chkval = $(this).next('.Incls').val();
+            var chkres = $(this).is(':checked');
+
+            $(SurveyTemplateData.SurveyCustomerTemplateModels).each(function (i, val) {
+
+                if (this.CustomerId == chkval) {
+                    SurveyTemplateData.SurveyCustomerTemplateModels[i].UserUpdateChk = chkres;
+
+                }
+
+            });
+        });
+
+
+        $(function () {
+            $("#CompanyBagId").change(function () {
+                PopulateCustSurveyMap();
+            });
+        });
+
+        $(function () {
+            $("#CompanyBagId1").change(function () {
+                PopulateCustSurveyMapEdt();
+            });
+        });
+
+        function checkCompanyId(arrData) {
+            var CompanyId = $('option:selected', $("#CompanyBagId")).val();
+            if (CompanyId == 0)
+                return true;
+            else
+                return arrData.CompanyId == CompanyId;
+        }
+
+        function PopulateCustSurveyMap() {
+
+            $('.AnsRow').remove();
+
+
+            arrData = SurveyTemplateData.SurveyCustomerTemplateModels.filter(checkCompanyId);
+
+            $.each(arrData, function (index, item) {
+                var Maindiv = $('<div class="AnsRow"></div>');
+                var Lbl = $('<label></label>');
+                var InputChk = $('<input type="checkbox" id="chkcls"/>');
+                $(InputChk).prop('checked', item.UserUpdateChk);
+
+                var InputAnsSeq = $('<input type="hidden" class="Incls" name = CustomerId value = "' + item.CustomerId + '"/>');
+
+                Lbl.append(InputChk).append(InputAnsSeq).append(item.CustomerName);
+                Maindiv.append(Lbl).append('<br/>');
+
+                $('#ChkOne').append(Maindiv);
+
+            });
+        }
+
+        function checkCompanyIdEdt(arrData) {
+            var CompanyId = $('option:selected', $("#CompanyBagId1")).val();
+            if (CompanyId == 0)
+                return true;
+            else
+                return arrData.CompanyId == CompanyId;
+        }
+
+        function PopulateCustSurveyMapEdt() {
+
+            $('.AnsRow').remove();
+
+
+            arrData = SurveyTemplateData.SurveyCustomerTemplateModels.filter(checkCompanyIdEdt);
+
+            $.each(arrData, function (index, item) {
+                var Maindiv = $('<div class="AnsRow"></div>');
+                var Lbl = $('<label></label>');
+                var InputChk = $('<input type="checkbox" id="chkcls"/>');
+                $(InputChk).prop('checked', item.UserUpdateChk);
+
+                var InputAnsSeq = $('<input type="hidden" class="Incls" name = CustomerId value = "' + item.CustomerId + '"/>');
+
+                Lbl.append(InputChk).append(InputAnsSeq).append(item.CustomerName);
+                Maindiv.append(Lbl).append('<br/>');
+
+                $('#ChkTwo').append(Maindiv);
+
+            });
+        }
+
+        // Populate table with pager.
+        // Parameters
+        // arrData - table data
+        // pageNum - table page number
+        function PopulateTable(arrData, pageNum) {
+            var rowsPerPage = 10;
+            var pages;
+            var i;
+            var pager = '';
+            var startIndex;
+            var endIndex;
+            var row;
+
+            $('#tblSurvey tr:gt(0)').remove();
+            if (arrData != null) {
+                // Populate table with data in the current page.
+                startIndex = (pageNum - 1) * rowsPerPage;
+                endIndex = pageNum * rowsPerPage > arrData.length ? arrData.length - 1 : pageNum * rowsPerPage - 1;
+                for (i = startIndex; i <= endIndex; i++) {
+
+                    var dateStart = new Date(parseInt(arrData[i].DateStart.substr(6)));
+                    var dateEnd = new Date(parseInt(arrData[i].DateEnd.substr(6)));
+
+                    row = '<tr><td>' + arrData[i].SurveyId + '</td>'
+                          + '<td>' + arrData[i].SurveyCaption + '</td>'
+                          + '<td>' + dateStart.toLocaleDateString() + '</td>'
+                          + '<td>' + dateEnd.toLocaleDateString() + '</td></tr>';
+                    $('#tblSurvey').append(row);
+
+                }
+
+                // Show pager row if there is more than one page
+                pages = Math.floor(arrData.length / rowsPerPage);
+                if (pages < arrData.length / rowsPerPage) {
+                    pages += 1;
+                }
+
+                if (pages > 1) {
+                    pager += '<ul class="pagination pagination-sm">';
+                    for (i = 0; i < pages; i++) {
+                        if (i == pageNum - 1) {
+                            pager += '<li class="active"><a>' + (i + 1) + '</a></li>';
+                        }
+                        else {
+                            pager += '<li><a href="#">' + (i + 1) + '</a></li>'
+                        }
+                    }
+                    pager += '</ul>';
+
+                    pager = '<tr><td colspan="5" class="pagerRow">' + pager + '</td></tr>';
+                    $('#tblSurvey').append(pager);
+
+
+                    // Pager link event handler
+                    $('#tblSurvey tr td.pagerRow a').click(function (e) {
+                        e.preventDefault();
+                        var pNum = parseInt($(this).text());
+                        PopulateTable(tableData, pNum);
+                        pNumKeep = pNum;
+                    });
+                }
+
+            }
+        }
+
+    </script>
+}

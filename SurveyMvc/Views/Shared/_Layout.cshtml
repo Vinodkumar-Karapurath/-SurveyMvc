@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title Survey </title>
+    @Styles.Render("~/Content/csss")
+    @Styles.Render("~/Content/css/font")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Styles.Render("~/Content/jqueryui")
+    @Scripts.Render("~/bundles/jqueryui")
+    @*@Styles.Render("~/Content/themes/base/css")*@
+    @Scripts.Render("~/bundles/bootstrap")
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+</head>
+<body>
+    
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+               
+                @Html.ActionLink("Survey Beta", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>@User.Identity.Name <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Profile</a></li>
+                        <li><a href="#">Settings</a></li>
+                        <li class="divider"></li>
+                        <li><a href=@Url.Action("logout", "AdminLogin")>Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+    <nav class="navbar navbar-inverse sidebar" role="navigation" style="z-index: 1;">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-sidebar-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"></a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-sidebar-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li id="navHome" class="active"><a href="/Home/Index">Dashboard<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-dashboard"></span></a></li>
+                    <li id="navCompany"><a href="/Company/CompanyIndex">Company<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-sitemap"></span></a></li>
+                    <li id="navCustomer"><a href="/Customer/CustomerIndex">Customers<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-globe"></span></a></li>
+                    <li id="navSurveyMaster"><a href="/SurveyMaster/SurveyMasterIndex">Survey Master<span style="font-size:16px;" class="pull-right hidden-xs showopacity glyphicon glyphicon-list-alt"></span></a></li>
+                    <li id="navSurveyQuestion"><a href="/SurveyQuestion/SurveyQuestionIndex">SurveyQuestions<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-edit"></span></a></li>
+                    <li id="navPossibleOption"><a href="/PossibleOption/PossibleOptionIndex">Possible Options<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-check"></span></a></li>
+                    <li id="navSurveyEmail"><a href="/SurveyEmail/SurveyEmailIndex">Emails<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-share"></span></a></li>
+                    <li id="navAdminUser"><a href="/AdminUser/AdminUserIndex">Users<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-group"></span></a></li>
+                    <li id="navResult"><a href="/Result/ResultIndex">Results<span style="font-size:16px;" class="pull-right hidden-xs showopacity glyphicon icon-bar-chart"></span></a></li>
+                    <li id="navResult"><a href="/Help/HelpIndex">Help<span style="font-size:16px;" class="pull-right hidden-xs showopacity icon-question-sign"></span></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div id="content" class="span10">
+        @RenderBody()
+    </div>
+    @*<footer class="footer">
+            <div class="container">
+                <p class="text-muted">Place sticky footer content here.</p>
+            </div>
+        </footer>*@
+
+ 
+    @RenderSection("scripts", required: false)
+    @section Scripts
+    {
+        <script>
+
+            function htmlbodyHeightUpdate() {
+                var height3 = $(window).height()
+                var height1 = $('.nav').height() + 50
+                height2 = $('.main').height()
+                if (height2 > height3) {
+                    $('html').height(Math.max(height1, height3, height2) + 10);
+                    $('body').height(Math.max(height1, height3, height2) + 10);
+                }
+                else {
+                    $('html').height(Math.max(height1, height3, height2));
+                    $('body').height(Math.max(height1, height3, height2));
+                }
+
+            }
+            $(document).ready(function () {
+               
+                htmlbodyHeightUpdate()
+                $(window).resize(function () {
+                    htmlbodyHeightUpdate()
+
+                });
+                $(window).scroll(function () {
+                    height2 = $('.main').height()
+                    htmlbodyHeightUpdate()
+                });
+
+            });
+
+        </script>
+    }
+</body>
+</html>

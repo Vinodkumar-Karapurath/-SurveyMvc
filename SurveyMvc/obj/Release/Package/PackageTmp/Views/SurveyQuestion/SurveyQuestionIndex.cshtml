@@ -1,0 +1,568 @@
+﻿@model MtsSurvey.Models.SurveyQuestionVM
+
+<style>
+    .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        background-color: #b3cbdc;
+    }
+</style>
+<ul class="breadcrumb">
+    <li>
+        <i class="icon-home"></i>
+        <a href="/Home/Index">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li><a href="#">Survey Questions</a></li>
+</ul>
+
+<br />
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="height: 50px;padding:10px">
+                <h4 class="panel-title pull-left" style="padding-top: 7.5px;">Survey Questions</h4>
+
+                <div class="btn-group pull-right">
+                    <a href="#" class="btn btn-default  btn-sm" data-toggle="modal" data-target="#myModal">
+                        <span class="glyphicon glyphicon-plus-sign">Add</span>
+                    </a>
+                    <a href="#" class="btn btn-default  btn-sm" data-toggle="modal" data-target="#myDelModal">
+                        <span class="glyphicon  glyphicon-pencil">Edit</span>
+                    </a>
+                </div>
+
+            </div>
+            <div class="panel-body">
+                @using (Html.BeginForm())
+                {
+                    <div class="table-responsive">
+                        <table id="tblCustomer" class="table table-striped table-bordered table-hover table-condensed">
+
+                            <caption>
+                                @*@Html.Label("Survey", htmlAttributes: new { @class = "control-label col-md-2" })*@
+                                @Html.DropDownList("SurveyMasterBag", null, htmlAttributes: new { @class = "form-control", @id = "SurveyMasterBagId" })
+                            </caption>
+                            <tr class="success">
+                                <th><a id="lnkSequance" href="#">SL No</a></th>
+                                <th style="display:none;">SurveyId</th>
+                                <th><a id="lnkQuestionId" href="#">QuestionId</a></th>
+                                <th><a id="lnkType" href="#">Survey Type</a></th>
+                                <th>Question</th>
+                                <th style="display:none;">PossibleAnswersID</th>
+                                <th>Possible Answers</th>
+                            </tr>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Question -->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add Question</h4>
+            </div>
+            @using (Ajax.BeginForm("AddQuestion", "SurveyQuestion", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="form-group row">
+                        @Html.HiddenFor(model => model.SurveyId)
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveySeq, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.SurveySeq, new { htmlAttributes = new { @class = "form-control  input-sm" } })
+                            @Html.ValidationMessageFor(model => model.SurveySeq, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Surveyquestion, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.TextAreaFor(model => model.Surveyquestion, htmlAttributes: new { @class = "form-control  input-sm" })
+                            @Html.ValidationMessageFor(model => model.Surveyquestion, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveyType, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.DropDownList("SurveyType", (SelectList)@ViewBag.SurveyTypeBag, htmlAttributes: new { @class = "form-control  input-sm" })
+                            @Html.ValidationMessageFor(model => model.SurveyType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row" id="PosAnsID">
+                        @Html.LabelFor(model => model.PossibleAnswersID, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.DropDownList("PossibleAnswersID", (SelectList)@ViewBag.QuestionBag, htmlAttributes: new { @class = "form-control  input-sm" })
+                            @Html.ValidationMessageFor(model => model.PossibleAnswersID, "", new { @class = "text-danger" })
+                            <a href="/PossibleOption/PossibleOptionIndex" class=" addrow control-label"><span class="glyphicon glyphicon-plus-sign"></span>Add</a>
+                            <a href="javascript:void(0);" id="Details" class="control-label" title="Possible Answers" data-toggle="popover" data-trigger="manual" data-content="Loading.." data-html="true" data-placement="bottom"><span class="glyphicon glyphicon-check"></span>Details</a>
+                        </div>
+                       
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-default">Save</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Edit/Delete Question -->
+<div id="myDelModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit/Delete Question</h4>
+            </div>
+            @using (Ajax.BeginForm(null, "SurveyQuestion", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmEdtID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="form-group row">
+                        @Html.HiddenFor(model => model.SurveyId, new { @id = "SurveyId1" })
+                        @Html.HiddenFor(model => model.QuestionId, new { @id = "QuestionId1" })
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveySeq, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.SurveySeq, new { htmlAttributes = new { @class = "form-control input-sm", @id = "SurveySeq1" } })
+                            @Html.ValidationMessageFor(model => model.SurveySeq, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Surveyquestion, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.TextAreaFor(model => model.Surveyquestion, htmlAttributes: new { @class = "form-control  input-sm", @id = "Surveyquestion1" })
+                            @Html.ValidationMessageFor(model => model.Surveyquestion, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.SurveyType, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.DropDownList("SurveyType", (SelectList)@ViewBag.SurveyTypeBag, htmlAttributes: new { @class = "form-control  input-sm", @id = "SurveyType1" })
+                            @Html.ValidationMessageFor(model => model.SurveyType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row" id="PosAnsID1">
+                        @Html.LabelFor(model => model.PossibleAnswersID, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-6">
+                            @Html.DropDownList("PossibleAnswersID", (SelectList)@ViewBag.QuestionBag,  htmlAttributes: new { @class = "form-control input-sm", @id = "PossibleAnswersID1" } )
+                            @Html.ValidationMessageFor(model => model.PossibleAnswersID, "", new { @class = "text-danger" })
+                            <a href="/PossibleOption/PossibleOptionIndex" class="addRow control-label"><span class="glyphicon glyphicon-plus-sign"></span>Add</a>
+                            <a href="javascript:void(0);" id="Details1" class="control-label" title="Possible Answers" data-toggle="popover" data-trigger="manual" data-content="Loading.." data-html="true" data-placement="bottom"><span class="glyphicon glyphicon-check"></span>Details</a>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="btnUpdate" type="button" class="btn btn-default">Update</button>
+                        <button id="btnDel" type="button" class="btn btn-default">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        // Global variable for table data
+        var tableData = null;
+        var pNumKeep = 1;
+
+        //edit delete js
+        function validator() {
+            return $('#frmEdtID').valid();
+
+        }
+
+        $('#btnUpdate').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("UpdateQuestion")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (this.QuestionId == result.QuestionId) {
+                                tableData.splice(i, 1, result);
+                            }
+
+                        });
+
+                        $('#frmEdtID')[0].reset();
+
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+        $('#btnDel').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("DeleteQuestion")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (this.QuestionId == result.QuestionId) {
+                                tableData.splice(i, 1);
+                            }
+
+                        });
+                        $('#frmEdtID')[0].reset();
+                        // Show pager row if there is more than one page
+                        var pages = Math.floor(tableData.length / 10);
+                        if (pages < tableData.length / 10) {
+                            pages += 1;
+                        }
+                        if (pages < pNumKeep) pNumKeep = pNumKeep - 1;
+
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+        $(function () {
+            $("#SurveyMasterBagId").change(function () {
+                //alert($('option:selected', this).val());
+                PopulateTable(tableData, 1);
+            });
+        });
+
+        $(function () {
+            $("#SurveyType").change(function () {
+                //alert($('option:selected', this).val());
+                var id = $('option:selected', this).val();
+                if (id == 2) {
+                    $("#PosAnsID").hide();
+                }
+                else {
+                    $("#PosAnsID").show();
+                }
+
+            });
+        });
+
+        $(function () {
+            $("#SurveyType1").change(function () {
+                //alert($('option:selected', this).val());
+                var id = $('option:selected', this).val();
+                if (id == 2) {
+                    $("#PosAnsID1").hide();
+                }
+                else {
+                    $("#PosAnsID1").show();
+                }
+
+            });
+        });
+
+        $('#frmID').submit(function () {
+            if ($(this).valid()) {
+                //Set SurveyId to hidden feild
+                var id = $('option:selected', $("#SurveyMasterBagId")).val();
+                $("#SurveyId").val(id);
+
+                $.ajax({
+                    url: this.action,
+                    type: this.method,
+                    data: $(this).serialize(),
+                    success: function (result) {
+
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                        });
+
+                        $('#frmID')[0].reset();
+
+                        tableData = tableData.concat(result);
+                        PopulateTable(tableData, pNumKeep);
+                    }
+                });
+            }
+            return false;
+        });
+
+
+        $('#tblCustomer').on('click', 'tr', function (e) {
+            e.preventDefault();
+
+            if ($(this).children('td:nth-child(1)').html() > 0) {
+
+                if ($(this).hasClass('danger')) {
+                    $(this).removeClass('danger');
+                } else {
+                    $(this).addClass('danger').siblings().removeClass('danger');
+                }
+
+                $('#SurveySeq1').val($(this).children('td:nth-child(1)').html());    //SurveySeq
+                $('#SurveyId1').val($(this).children('td:nth-child(2)').html());   //SurveyId
+                $('#QuestionId1').val($(this).children('td:nth-child(3)').html());   //QuestionId
+                $('#SurveyType1').val($(this).children('td:nth-child(4)').html()).trigger('change');           //SurveyType
+                $('#Surveyquestion1').val($(this).children('td:nth-child(5)').html());        //Surveyquestion
+                $('#PossibleAnswersID1').val($(this).children('td:nth-child(6)').html()).trigger('change');        //PossibleAnswersID
+               
+            }
+        });
+
+        $.ajaxSetup({
+            cache: false
+        });
+
+        $(document).ready(function () {
+            $(".nav li").removeClass("active");//this will remove the active class from
+            //previously active menu item
+            $('#navSurveyQuestion').addClass('active');
+
+            //console.log("window ready");
+            // Populate categories when the page is loaded.
+            $.getJSON('/SurveyQuestion/GetAllQuestion', function (data) {
+                // Populate table from Json data returned from server.
+
+                PopulateTable(data, 1);
+                pNumKeep = 1;
+                tableData = data.slice(0);
+
+
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                // Ajax fail callback function.
+                alert('Error getting products!');
+            });
+
+           
+
+            //$("#SurveyMasterBagId").prepend("<option value='0'>Select All</option>");
+            //$("#SurveyMasterBagId").val(0);
+
+            //var mySelect = $('#SurveyMasterBagId');
+            //mySelect.append($('<option></option>').val(0).html('Select All'));
+
+            // Link ActivityId ID click event handler
+            $('#lnkCompanyID').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.CompanyId <= b.CompanyId ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // Link date Name click event handler
+            $('#lnkCompanyName').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.CompanyName <= b.CompanyName ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // row full selection
+            $('#tblProducts tr').click(function () {
+                var href = $(this).find("a").attr("href");
+                if (href) {
+                    window.location = href;
+                }
+            });
+
+        });
+
+        function checkSurveyId(arrData) {
+            var id = $('option:selected', $("#SurveyMasterBagId")).val();
+            if (id == 0)
+                return true;
+            else
+                return arrData.SurveyId == id;
+        }
+
+        // Populate table with pager.
+        // Parameters
+        // arrData - table data
+        // pageNum - table page number
+        function PopulateTable(temparrData, pageNum) {
+            var rowsPerPage = 10;
+            var pages;
+            var i;
+            var pager = '';
+            var startIndex;
+            var endIndex;
+            var row;
+
+            arrData = temparrData.filter(checkSurveyId);
+
+            $('#tblCustomer tr:gt(0)').remove();
+            if (arrData != null) {
+                // Populate table with data in the current page.
+                startIndex = (pageNum - 1) * rowsPerPage;
+                endIndex = pageNum * rowsPerPage > arrData.length ? arrData.length - 1 : pageNum * rowsPerPage - 1;
+                for (i = startIndex; i <= endIndex; i++) {
+
+
+                    row = '<tr><td>' + arrData[i].SurveySeq + '</td>'
+                                     + '<td style="display:none;">' + arrData[i].SurveyId + '</td>'
+                                     + '<td>' + arrData[i].QuestionId + '</td>'
+                                     + '<td>' + arrData[i].SurveyType + '</td>'
+                                     + '<td>' + arrData[i].Surveyquestion + '</td>'
+                                     + '<td style="display:none;">' + arrData[i].PossibleAnswersID + '</td>'
+                                     + '<td>' + arrData[i].PossibleAnswers + '</td></tr>';
+                    $('#tblCustomer').append(row);
+
+                }
+
+                // Show pager row if there is more than one page
+                pages = Math.floor(arrData.length / rowsPerPage);
+                if (pages < arrData.length / rowsPerPage) {
+                    pages += 1;
+                }
+
+                if (pages > 1) {
+                    pager += '<ul class="pagination pagination-sm">';
+                    for (i = 0; i < pages; i++) {
+                        if (i == pageNum - 1) {
+                            pager += '<li class="active"><a>' + (i + 1) + '</a></li>';
+                        }
+                        else {
+                            pager += '<li><a href="#">' + (i + 1) + '</a></li>'
+                        }
+                    }
+                    pager += '</ul>';
+
+                    pager = '<tr><td colspan="5" class="pagerRow">' + pager + '</td></tr>';
+                    $('#tblCustomer').append(pager);
+
+
+                    // Pager link event handler
+                    $('#tblCustomer tr td.pagerRow a').click(function (e) {
+                        e.preventDefault();
+                        var pNum = parseInt($(this).text());
+                        PopulateTable(tableData, pNum);
+                        pNumKeep = pNum;
+                    });
+                }
+
+            }
+        }
+
+        var PopOverData = "";
+        var PopOverData1 = "";
+
+        $(function () {
+
+            $("#Details, #Details1").hover(function () {
+
+                if ($('.popover').hasClass('in')) {
+                    $(this).popover('hide');
+                }
+                else {
+
+                        if (this == $("#Details"))
+                        { $(this).attr('data-content', PopOverData); }
+                        else
+                        { $(this).attr('data-content', PopOverData1); }
+                    $(this).popover('show');
+                }
+            });
+
+           
+            $("#PossibleAnswersID, #PossibleAnswersID1").change(function () {
+               
+                $.ajax({
+                    url: "/SurveyQuestion/GetPossibleAnswers",
+                    contentType: "application/json; charset=utf-8",
+                    type: "POST",
+                    data: '{ PossibleAnswersID: ' + $('option:selected', $(this)).val() + ' }',
+                    dataType: "json",
+                    success: function (result) {
+                        if (this == $("#PossibleAnswersID"))
+                        { PopOverData = ""; }
+                        else
+                        { PopOverData1 = ""; }
+
+                        $(result).each(function (i, Item) {
+
+                            if (this == $("#PossibleAnswersID"))
+                            { PopOverData += Item.AnswerText + ' </br>'; }
+                            else
+                             { PopOverData1 += Item.AnswerText + ' </br>'; }
+                        });
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Error getting Possible Answers!');
+                    }
+                });
+
+            }).change();
+            });
+     
+       
+       
+
+    </script>
+
+}

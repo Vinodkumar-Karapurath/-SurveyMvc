@@ -1,0 +1,545 @@
+﻿@using MtsSurvey.Models;
+@model MtsSurvey.Models.SurveyAnsMasterModel
+
+<style>
+    .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        background-color: #b3cbdc;
+    }
+
+    .Chkcontainer {
+        border: 1px solid #ccc;
+        width: 100%;
+        height: 100px;
+        padding-left: 1.7em;
+        resize: both;
+        overflow: auto;
+    }
+</style>
+<ul class="breadcrumb">
+    <li>
+        <i class="icon-home"></i>
+        <a href="/Home/Index">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li><a href="#">Possible Options</a></li>
+</ul>
+
+<br />
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="height: 50px;padding:10px">
+                <h4 class="panel-title pull-left" style="padding-top: 7.5px;">Possible Options</h4>
+
+                <div class="btn-group pull-right">
+                    <a href="#" class="btn btn-default  btn-sm">
+                        <span class="glyphicon glyphicon-plus-sign" id="myAddBtn">Add</span>
+                    </a>
+                    <a href="#" class="btn btn-default  btn-sm">
+                        <span class="glyphicon  glyphicon-pencil" id="myEdtBtn">Edit</span>
+                    </a>
+                </div>
+
+            </div>
+            <div class="panel-body">
+                @using (Html.BeginForm())
+                {
+                    <div class="table-responsive">
+                        <table id="tblAnswer" class="table table-striped table-bordered table-hover table-condensed">
+                            <tr class="success">
+                                <th><a id="lnkAnswerID" href="#">Answer ID</a></th>
+                                <th><a id="lnkAnswerName" href="#">Answer Caption</a></th>
+                            </tr>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Add Customer -->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add Survey Answer</h4>
+            </div>
+            @using (Ajax.BeginForm("AddSurveyAnswer", "PossibleOption", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Caption, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.Caption, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Caption, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.Label("Answer List", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            <div class="Chkcontainer checkbox" id="ChkOne">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                            <a href="javascript:void(0);" class="addRow control-label" data-target="#ChkOne" data-source="#NewAns"><span class="glyphicon glyphicon-plus-sign"></span>Add</a>
+                            <a href="javascript:void(0);" class="UpRow control-label" data-target="#ChkOne"><span class="glyphicon glyphicon-circle-arrow-up"></span>Up</a>
+                            <a href="javascript:void(0);" class="DownRow control-label" data-target="#ChkOne"><span class="glyphicon glyphicon-circle-arrow-down"></span>Down</a>
+                            <a href="javascript:void(0);" class="RemoveRow control-label" data-target="#ChkOne"><span class="glyphicon glyphicon-trash"></span>Remove</a>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.Label("Answer", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.Editor("NewAns", new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Edit/Delete Survey Answer -->
+<div id="myDelModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit/Delete Survey Answer</h4>
+            </div>
+            @using (Ajax.BeginForm(null, "PossibleOption", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmEdtID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.AnswerID, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.AnswerID, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @id = "AnswerID" } })
+                            @Html.ValidationMessageFor(model => model.AnswerID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Caption, htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.EditorFor(model => model.Caption, new { htmlAttributes = new { @class = "form-control", @id = "Caption1" } })
+                            @Html.ValidationMessageFor(model => model.Caption, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.Label("Answer List", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            <div class="Chkcontainer checkbox" id="ChkTwo">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                            <a href="javascript:void(0);" class="addRow control-label" data-target="#ChkTwo" data-source="#NewAnsTwo"><span class="glyphicon glyphicon-plus-sign"></span>Add</a>
+                            <a href="javascript:void(0);" class="UpRow control-label" data-target="#ChkTwo"><span class="glyphicon glyphicon-circle-arrow-up"></span>Up</a>
+                            <a href="javascript:void(0);" class="DownRow control-label" data-target="#ChkTwo"><span class="glyphicon glyphicon-circle-arrow-down"></span>Down</a>
+                            <a href="javascript:void(0);" class="RemoveRow control-label" data-target="#ChkTwo"><span class="glyphicon glyphicon-trash"></span>Remove</a>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.Label("Answer", htmlAttributes: new { @class = "control-label col-md-6" })
+                        <div class="col-md-6">
+                            @Html.Editor("NewAnsTwo", new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="btnUpdate" type="button" class="btn btn-default">Update</button>
+                    <button id="btnDel" type="button" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+
+
+
+        $(".addRow").click(function () {
+
+            var targetDiv$ = $(this).attr("data-target");
+            var SourceDiv$ = $(this).attr("data-Source");
+
+            if ($(SourceDiv$).val().trim().length <= 0) {
+                $(SourceDiv$).css({ "background": "#FFCECE" })
+                return;
+            }
+            else {
+                $(SourceDiv$).css({ "background": "" })
+
+            }
+
+            var rowCount = $('.AnsRow', $(targetDiv$)).length
+
+            var Maindiv = $('<div class="AnsRow"></div>');
+            var Lbl = $('<label></label>');
+            var InputChk = $('<input type="checkbox" class="chkcls"/>');
+
+            var InputAnsSeq = $('<input type="hidden" class="InclsAnsSeq" name = SurveyAnswerModels[' + rowCount + '].AnswerSeq value = "' + (rowCount + 1) + '"/>');
+            var InputAns = $('<input type="hidden" class="InclsAns" name = SurveyAnswerModels[' + rowCount + '].AnswerText value = "' + $(SourceDiv$).val() + '"/>');
+
+            Lbl.append(InputChk).append(InputAnsSeq).append(InputAns).append($(SourceDiv$).val());
+            Maindiv.append(Lbl).append('<br/>');
+            $(targetDiv$).append(Maindiv);
+
+            $(SourceDiv$).val('');
+
+        });
+
+        function ReorderList(targetDiv$) {
+            $('.InclsAnsSeq', $(targetDiv$)).each(function (index) {
+                $(this).attr('name', 'SurveyAnswerModels[' + index + '].AnswerSeq').attr('value', (index + 1));
+            });
+
+            $('.InclsAns', $(targetDiv$)).each(function (index) {
+                $(this).attr('name', 'SurveyAnswerModels[' + index + '].AnswerText');
+            });
+        }
+
+        $(".RemoveRow").click(function () {
+
+            var targetDiv$ = $(this).attr("data-target");
+
+            $('.chkcls', $(targetDiv$)).each(function (index) {
+                if ($(this).is(":checked") == true) {
+                    $(this).closest('.AnsRow').remove();
+                }
+            });
+
+            ReorderList(targetDiv$);
+
+        });
+
+        $(".UpRow").click(function () {
+            var targetDiv$ = $(this).attr("data-target");
+
+            $('.chkcls', $(targetDiv$)).each(function (index) {
+                if ($(this).is(":checked") == true) {
+
+                    var tt = $(this).closest('.AnsRow');
+                    var tt1 = $(tt).prev();
+                    $(tt).insertBefore(tt1);
+
+                }
+            });
+            ReorderList(targetDiv$);
+        });
+
+        $(".DownRow").click(function () {
+            var targetDiv$ = $(this).attr("data-target");
+            $('.chkcls', $(targetDiv$)).each(function (index) {
+                if ($(this).is(":checked") == true) {
+
+                    var tt = $(this).closest('.AnsRow');
+                    var tt1 = $(tt).next();
+                    $(tt).insertAfter(tt1);
+
+                }
+            });
+            ReorderList(targetDiv$);
+        });
+
+
+        $('#tblAnswer').on('click', 'tr', function (e) {
+            e.preventDefault();
+
+            if ($(this).children('td:nth-child(1)').html() > 0) {
+
+                if ($(this).hasClass('danger')) {
+                    $(this).removeClass('danger');
+                } else {
+                    $(this).addClass('danger').siblings().removeClass('danger');
+                }
+
+                $('#AnswerID').val($(this).children('td:nth-child(1)').html());
+            }
+        });
+
+        $('#frmID').submit(function () {
+            if ($(this).valid()) {
+                $.ajax({
+                    url: this.action,
+                    type: this.method,
+                    data: $(this).serialize(),
+                    success: function (result) {
+
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                        });
+                        //$('#CompanyName').val("");
+                        tableData = tableData.concat(result);
+                        PopulateTable(tableData, pNumKeep);
+                    }
+                });
+            }
+            return false;
+        });
+
+        //edit delete js
+        function validator() {
+            return $('#frmEdtID').valid();
+
+        }
+
+        $('#btnUpdate').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("UpdateSurveyAnswer")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function () {
+                            if (this.AnswerID == result.AnswerID) {
+                                this.Caption = result.Caption;
+                            }
+
+                        });
+                        $('#AnswerID').val("");
+                        $('#Caption1').val("");
+                        $('.AnsRow').remove();
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+        $('#btnDel').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("DeleteSurveyAnswer")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (val.AnswerID == result.AnswerID) {
+                                tableData.splice(i, 1);
+                            }
+
+                        });
+                        $('#AnswerID').val("");
+                        $('#Caption1').val("");
+                        $('.AnsRow').remove();
+
+                        // Show pager row if there is more than one page
+                        var pages = Math.floor(tableData.length / 10);
+                        if (pages < tableData.length / 10) {
+                            pages += 1;
+                        }
+                        if (pages < pNumKeep) pNumKeep = pNumKeep - 1;
+
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+        // Global variable for table data
+        var tableData = null;
+        var pNumKeep = 1;
+
+        $(document).ready(function () {
+
+            $(".nav li").removeClass("active");//this will remove the active class from
+            //previously active menu item
+            $('#navPossibleOption').addClass('active');
+
+            //console.log("window ready");
+            // Populate categories when the page is loaded.
+            $.getJSON('/PossibleOption/GetAllSurveyAnswer', function (data) {
+                // Populate table from Json data returned from server.
+                PopulateTable(data, 1);
+                pNumKeep = 1;
+                tableData = data.slice(0);
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                // Ajax fail callback function.
+                alert('Error getting SurveyAnswer!');
+            });
+
+            // Link ActivityId ID click event handler
+            $('#lnkAnswerID').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.AnswerID <= b.AnswerID ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // Link date Name click event handler
+            $('#lnkAnswerName').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.Caption <= b.Caption ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            $("#myAddBtn").click(function () {
+                $('.AnsRow').remove();
+                $("#myModal").modal();
+            });
+
+            $("#myEdtBtn").click(function () {
+
+                $.getJSON('/PossibleOption/GetSelectedSurveyAnswer', { AnswerID: $('#AnswerID').val() }, function (data) {
+                    // Populate table from Json data returned from server.
+
+                    PopulateEditForm(data);
+                    $("#myDelModal").modal();
+
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    // Ajax fail callback function.
+                    alert('Error getting SurveyAnswer!');
+                });
+            });
+        });
+
+        function PopulateEditForm(FrmData) {
+            $('#Caption1').val(FrmData.Caption);
+            $('.AnsRow').remove();
+
+
+            $.each(FrmData.SurveyAnswerModels, function (index, item) {
+                var Maindiv = $('<div class="AnsRow"></div>');
+                var Lbl = $('<label></label>');
+                var InputChk = $('<input type="checkbox" class="chkcls"/>');
+
+                var InputAnsSeq = $('<input type="hidden" class="InclsAnsSeq" name = SurveyAnswerModels[' + index + '].AnswerSeq value = "' + item.AnswerSeq + '"/>');
+                var InputAns = $('<input type="hidden" class="InclsAns" name = SurveyAnswerModels[' + index + '].AnswerText value = "' + item.AnswerText + '"/>');
+                Lbl.append(InputChk).append(InputAnsSeq).append(InputAns).append(item.AnswerText);
+                Maindiv.append(Lbl).append('<br/>');
+                $('.Chkcontainer').append(Maindiv);
+
+            });
+        }
+
+        // Populate table with pager.
+        // Parameters
+        // arrData - table data
+        // pageNum - table page number
+        function PopulateTable(arrData, pageNum) {
+            var rowsPerPage = 10;
+            var pages;
+            var i;
+            var pager = '';
+            var startIndex;
+            var endIndex;
+            var row;
+
+            $('#tblAnswer tr:gt(0)').remove();
+            if (arrData != null) {
+                // Populate table with data in the current page.
+                startIndex = (pageNum - 1) * rowsPerPage;
+                endIndex = pageNum * rowsPerPage > arrData.length ? arrData.length - 1 : pageNum * rowsPerPage - 1;
+                for (i = startIndex; i <= endIndex; i++) {
+
+
+                    row = '<tr><td>' + arrData[i].AnswerID + '</td>'
+
+                          + '<td>' + arrData[i].Caption + '</td></tr>';
+                    $('#tblAnswer').append(row);
+
+                }
+
+                // Show pager row if there is more than one page
+                pages = Math.floor(arrData.length / rowsPerPage);
+                if (pages < arrData.length / rowsPerPage) {
+                    pages += 1;
+                }
+
+                if (pages > 1) {
+                    pager += '<ul class="pagination pagination-sm">';
+                    for (i = 0; i < pages; i++) {
+                        if (i == pageNum - 1) {
+                            pager += '<li class="active"><a>' + (i + 1) + '</a></li>';
+                        }
+                        else {
+                            pager += '<li><a href="#">' + (i + 1) + '</a></li>'
+                        }
+                    }
+                    pager += '</ul>';
+
+                    pager = '<tr><td colspan="5" class="pagerRow">' + pager + '</td></tr>';
+                    $('#tblAnswer').append(pager);
+
+
+                    // Pager link event handler
+                    $('#tblAnswer tr td.pagerRow a').click(function (e) {
+                        e.preventDefault();
+                        var pNum = parseInt($(this).text());
+                        PopulateTable(tableData, pNum);
+                        pNumKeep = pNum;
+                    });
+                }
+            }
+        }
+
+    </script>
+}

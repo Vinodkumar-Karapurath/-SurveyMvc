@@ -1,0 +1,402 @@
+﻿@model MtsSurvey.Models.AdminuserModel
+
+
+<style>
+    .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        background-color: #b3cbdc;
+    }
+</style>
+
+<ul class="breadcrumb">
+    <li>
+        <i class="icon-home"></i>
+        <a href="/Home/Index">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li><a href="#">Admin Users</a></li>
+</ul>
+<br />
+
+
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="col-md-8 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="height: 50px;padding:10px">
+                <h4 class="panel-title pull-left" style="padding-top: 7.5px;">Users</h4>
+
+                <div class="btn-group pull-right">
+                    <a href="#" class="btn btn-default btn-sm" data-toggle="modal" data-target="#myModal">
+                        <span class="glyphicon glyphicon-plus-sign">Add</span>
+                    </a>
+                    <a href="#" class="btn btn-default btn-sm" data-toggle="modal" data-target="#myDelModal">
+                        <span class="glyphicon  glyphicon-pencil">Edit</span>
+                    </a>
+                </div>
+
+            </div>
+            <div class="panel-body">
+                @using (Html.BeginForm())
+                {
+                    <div class="table-responsive">
+                        <table id="tblCompany" class="table table-striped table-bordered table-hover table-condensed">
+                            <tr class="success">
+                                <th><a id="lnkUserID" href="#">UserID</a></th>
+                                <th><a id="lnkEmail" href="#">Email</a></th>
+                                <th><a id="lnkPasscode" href="#">Passcode</a></th>
+                            </tr>
+                        </table>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Add Users -->
+<div id="myModal" class="modal fade" role="dialog" tabindex="-1">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header  clearfix">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add Users</h4>
+            </div>
+            @using (Ajax.BeginForm("AddAdminUser", "AdminUser", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control input-sm" } })
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.passcode, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.passcode, new { htmlAttributes = new { @class = "form-control input-sm" } })
+                            @Html.ValidationMessageFor(model => model.passcode, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="submit" class="btn btn-default">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit/Delete Users -->
+<div id="myDelModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header  clearfix">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit/Delete Users</h4>
+            </div>
+            @using (Ajax.BeginForm(null, "AdminUser", null, new AjaxOptions { UpdateTargetId = "result" }, new { @id = "frmEdtID" }))
+            {
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.AdminLoginId, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.AdminLoginId, new { htmlAttributes = new { @class = "form-control input-sm", @readonly = "readonly", @id = "AdminLoginId1" } })
+                            @Html.ValidationMessageFor(model => model.AdminLoginId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control input-sm", @id = "Email1" } })
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.passcode, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-4">
+                            @Html.EditorFor(model => model.passcode, new { htmlAttributes = new { @class = "form-control input-sm", @id = "passcode1" } })
+                            @Html.ValidationMessageFor(model => model.passcode, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="btnUpdate" type="button" class="btn btn-default">Update</button>
+                    <button id="btnDel" type="button" class="btn btn-default">Delete</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+
+        // Global variable for table data
+        var tableData = null;
+        var pNumKeep = 1;
+
+        $('.modal-dialog').draggable({
+            handle: ".modal-header"
+        });
+
+        //edit delete js
+        function validator() {
+            return $('#frmEdtID').valid();
+
+        }
+
+        $('#btnUpdate').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("UpdateAdminUser")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (this.AdminLoginId == result.AdminLoginId) {
+                                tableData.splice(i, 1, result);
+                            }
+
+                        });
+                        $('#AdminLoginId1').val("");
+                        $('#Email1').val("");
+                        $('#passcode1').val("");
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+        $('#btnDel').click(function () {
+
+            if (validator()) {
+
+                $.ajax({
+                    url: '@Url.Action("DeleteAdminUser")',
+                    type: "POST",
+                    data: $('#frmEdtID').serialize(),
+                    success: function (result) {
+
+                        $(tableData).each(function (i, val) {
+                            if (val.AdminLoginId == result.AdminLoginId) {
+                                tableData.splice(i, 1);
+                            }
+
+                        });
+                        $('#AdminLoginId1').val("");
+                        $('#Email1').val("");
+                        $('#passcode1').val("");
+
+                        // Show pager row if there is more than one page
+                        var pages = Math.floor(tableData.length / 10);
+                        if (pages < tableData.length / 10) {
+                            pages += 1;
+                        }
+                        if (pages < pNumKeep) pNumKeep = pNumKeep - 1;
+
+                        $(function () {
+                            $('#myDelModal').modal('toggle');
+                        });
+                        PopulateTable(tableData, pNumKeep);
+                    },
+                    error: function (result) {
+                        alert("Failed");
+                    }
+                });
+            };
+            return false;
+        });
+
+        ///
+
+
+
+        $('#tblCompany').on('click', 'tr', function (e) {
+            e.preventDefault();
+
+            if ($(this).children('td:nth-child(1)').html() > 0) {
+
+                if ($(this).hasClass('danger')) {
+                    $(this).removeClass('danger');
+                } else {
+                    $(this).addClass('danger').siblings().removeClass('danger');
+                }
+
+                $('#AdminLoginId1').val($(this).children('td:nth-child(1)').html());
+                $('#Email1').val($(this).children('td:nth-child(2)').html());
+                $('#passcode1').val($(this).children('td:nth-child(3)').html());
+
+            }
+        });
+
+
+        $('#frmID').submit(function () {
+            if ($(this).valid()) {
+                $.ajax({
+                    url: this.action,
+                    type: this.method,
+                    data: $(this).serialize(),
+                    success: function (result) {
+
+                        $(function () {
+                            $('#myModal').modal('toggle');
+                        });
+                        $('#Email').val("");
+                        $('#passcode').val("");
+                        tableData = tableData.concat(result);
+                        PopulateTable(tableData, pNumKeep);
+                    }
+                });
+            }
+            return false;
+        });
+
+
+        $(document).ready(function () {
+
+            $(".nav li").removeClass("active");//this will remove the active class from
+            //previously active menu item
+            $('#navAdminUser').addClass('active');
+
+            //console.log("window ready");
+            // Populate categories when the page is loaded.
+            $.getJSON('/AdminUser/GetAllAdminUser', function (data) {
+                // Populate table from Json data returned from server.
+                PopulateTable(data, 1);
+                pNumKeep = 1;
+                tableData = data.slice(0);
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                // Ajax fail callback function.
+                alert('Error getting Users!');
+            });
+
+            // Link ActivityId ID click event handler
+            $('#lnkUserID').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.AdminLoginId <= b.AdminLoginId ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // Link date Name click event handler
+            $('#lnkEmail').click(function (e) {
+                e.preventDefault();
+                if (tableData != null) {
+                    // Sort data
+                    tableData.sort(function (a, b) {
+                        return a.Email <= b.Email ? -1 : 1;
+                    });
+                    PopulateTable(tableData, 1);
+                }
+            });
+
+            // row full selection
+            $('#tblProducts tr').click(function () {
+                var href = $(this).find("a").attr("href");
+                if (href) {
+                    window.location = href;
+                }
+            });
+
+        });
+
+        // Populate table with pager.
+        // Parameters
+        // arrData - table data
+        // pageNum - table page number
+        function PopulateTable(arrData, pageNum) {
+            var rowsPerPage = 10;
+            var pages;
+            var i;
+            var pager = '';
+            var startIndex;
+            var endIndex;
+            var row;
+
+            $('#tblCompany tr:gt(0)').remove();
+            if (arrData != null) {
+                // Populate table with data in the current page.
+                startIndex = (pageNum - 1) * rowsPerPage;
+                endIndex = pageNum * rowsPerPage > arrData.length ? arrData.length - 1 : pageNum * rowsPerPage - 1;
+                for (i = startIndex; i <= endIndex; i++) {
+
+
+                    row = '<tr><td>' + arrData[i].AdminLoginId + '</td>'
+
+                          + '<td>' + arrData[i].Email + '</td>'
+                          + '<td>' + arrData[i].passcode + '</td></tr>';
+                    $('#tblCompany').append(row);
+
+                }
+
+                // Show pager row if there is more than one page
+                pages = Math.floor(arrData.length / rowsPerPage);
+                if (pages < arrData.length / rowsPerPage) {
+                    pages += 1;
+                }
+
+                if (pages > 1) {
+                    pager += '<ul class="pagination pagination-sm">';
+                    for (i = 0; i < pages; i++) {
+                        if (i == pageNum - 1) {
+                            pager += '<li class="active"><a>' + (i + 1) + '</a></li>';
+                        }
+                        else {
+                            pager += '<li><a href="#">' + (i + 1) + '</a></li>'
+                        }
+                    }
+                    pager += '</ul>';
+
+                    pager = '<tr><td colspan="5" class="pagerRow">' + pager + '</td></tr>';
+                    $('#tblCompany').append(pager);
+
+
+                    // Pager link event handler
+                    $('#tblCompany tr td.pagerRow a').click(function (e) {
+                        e.preventDefault();
+                        var pNum = parseInt($(this).text());
+                        PopulateTable(tableData, pNum);
+                        pNumKeep = pNum;
+                    });
+                }
+
+            }
+        }
+    </script>
+}
